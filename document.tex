@@ -192,38 +192,39 @@ $$Mp = O(n^3/p^{3/2} + n^2) = O(n^2 \cdot (n/p^(3/2) + 1)) = O(n^3/p^{3/2})$$
 For each invocation of the algorithm, each processor performs $\sqrt{p}$ Strassen
 matrix multiplications of submatrices of size $n/\sqrt{p}$. Strassen matrix
 multiplication performs $\approx O(n^{2.807})$ multiplications, so the number of
-operations per processor is $O(\sqrt{p}*(n/\sqrt{p})^{2.807})$. Then the total
-parallel computation time is:
+operations per processor is $O(\sqrt{p}*(n/\sqrt{p})^{2.807})$. Then the computation time is:
 
 \begin{eqnarray*}
-T_{{comp}} &=& O(t_{{mult}} \cdot p \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807}) \\
-&=& O(t_{{mult}} \cdot p^{3/2} \cdot (n/\sqrt{p})^{2.807}) \\
-&=& O(t_{{mult}} \cdot n^{2.807} \cdot p^{3/2} \cdot  p^{-2.807/2}) \\
-&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{(3-2.807)/2}) \\
-&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{0.096})
+T_{{comp}} &=& O(t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807}) \\
+&=& O(t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807}) \\
+&=& O(t_{{mult}} \cdot n^{2.807} \cdot \sqrt{p} \cdot  p^{-2.807/2}) \\
+&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{(1-2.807)/2}) \\
+&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035})
 \end{eqnarray*}
 
 \subsubsection{Parallel communication time}
 
 This is unchanged from the regular Cannon's algorithm:
 
-$$	T_{{comm}} = T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} =$$
-$$		= 2*T_{{scatter}} + T_{{skew}} + T_{{shift}} =$$
-$$		= t_s*2*\log{p} + t_w*2*(n^2/p)*(p-1) + \sqrt{p}/2 * (t_s + t_w*n^2/p) + \sqrt{p}*(t_s + t_w*n^2/p) =$$
-$$		= t_s*2*\log{p} + t_w*2*(n^2/p)*(p-1) + \sqrt{p}*3/2 * (t_s + t_w*n^2/p) =$$
-$$		= t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(2*(n^2/p)*(p-1) + n^2/p) =$$
-$$		= t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(n^2/p)*(2*(p-1) + 1) =$$
-$$		= t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(n^2/p)*(2p-1)$$
+\begin{eqnarray*}
+T_{{comm}} &=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
+&=& 2 \cdot T_{{scatter}} + T_{{skew}} + T_{{shift}} \\
+&=& t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p) \cdot (2p-1)
+\end{eqnarray*}
+
 
 \subsubsection{Parallel run-time}
 
-$$T_p = T_{{comp}} + T_{{comm}} = t_{{mult}} * n^2.807 * p^0.096 + t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(n^2/p)*(2p-1) =$$
-$$	= O(n^2.807 * p^0.096 + log(p) + sqrt(p) + n^2*(2p-1)/p) =$$
-$$	= O(n^2.807 * p^0.096 + sqrt(p))$$
+\begin{eqnarray*}
+T_p &=& T_{{comp}} + T_{{comm}} \\
+&=& t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035} +  t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p) \cdot (2p-1) \\
+&=& O(n^{2.807} \cdot  p^{-0.9035} + log(p) + sqrt(p) + n^2*(2p-1)/p) \\
+&=& O(n^{2.807} \cdot  p^{-0.9035} + sqrt(p))
+\end{eqnarray*}
 
 Since n is always greater than p, we can reduce this to:
 
-$$	T_p = O(n^{2.807} * p^{0.096})$$
+$$	T_p = O(n^{2.807} \cdot  p^{-0.9035})$$
 
 
 
