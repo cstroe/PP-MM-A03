@@ -2,6 +2,7 @@
 
 \usepackage{graphicx}
 \usepackage{multimedia}
+\usepackage{amssymb}
 
 %\usepackage{algorithmic}
 \usepackage{fancybox}
@@ -79,9 +80,12 @@ For each invocation of the algorithm, each processor performs $\sqrt{p}$ naive
 matrix multiplications of submatrices of size $n/\sqrt{p}$. Naive matrix
 multiplication performs $O(n^3)$ multiplications, so the number of operations
 per processor is $O(\sqrt{p}(n/\sqrt{p})^3)$. Then the total parallel
-computation time is: $$T_{{comp}} = O(t_{{mult}} \cdot p \cdot \sqrt{p} \cdot
-(n/\sqrt{p})^3) = O(t_{{mult}} \cdot n^3)$$
+computation time is: 
 
+\begin{eqnarray*}
+T_{{comp}} 	&=& O(t_{{mult}} \cdot p \cdot \sqrt{p} \cdot (n/\sqrt{p})^3) \\ 
+			&=& O(t_{{mult}} \cdot n^3)
+\end{eqnarray*}
 
 \subsubsection{Parallel Communication Time}
 
@@ -110,21 +114,28 @@ $$T_{{shift}} = \sqrt{p} \cdot (t_s + t_w \cdot n^2/p)$$
 
 Then the overall communication time is:
 
-$$T_{{comm}} = T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} =$$
-$$= 2*T_{{scatter}} + T_{{skew}} + T_{{shift}} =$$
-$$= t_s*2*log(p) + t_w*2*(n^2/p)*(p-1) + sqrt(p)/2 * (t_s + t_w*n^2/p) + \\
-\sqrt{p}*(t_s + t_w*n^2/p) = $$ $$= t_s*2*log(p) + t_w*2*(n^2/p)*(p-1) +
-\sqrt{p}*3/2* (t_s + t_w*n^2/p) =$$ $$ = t_s*(2*\log{p} + 3/2*\sqrt{p}) +
-t_w*(2*(n^2/p)*(p-1) + n^2/p) =$$ $$		= t_s*(2*log(p) + 3/2*sqrt(p)) + t_w*(n^2/p)*(2*(p-1) + 1) =$$
-$$		= t_s*(2*log(p) + 3/2*sqrt(p)) + t_w*(n^2/p)*(2p-1)$$
+
+\begin{eqnarray*}
+T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
+			&=& 2 \cdot T_{{scatter}} + T_{{skew}} + T_{{shift}}  \\
+			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p}/2 \cdot (t_s + t_w \cdot n^2/p) + \sqrt{p} \cdot (t_s + t_w \cdot n^2/p) \\ 
+			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p} \cdot 3/2 \cdot (t_s + t_w \cdot n^2/p) \\ 
+			&=& t_s(2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w (2 \cdot (n^2/p)(p-1) + n^2/p) \\ 
+			&=& t_s (2 \log{p} + 3/2 \sqrt{p}) + t_w (n^2/p)(2(p-1) + 1) \\
+			&=& t_s (2 \log{p} + 3/2 \sqrt{p}) + t_w (n^2/p)(2p-1) \\
+\end{eqnarray*}
+
 
 
 \subsubsection{Parallel Run Time}
 
-$$T_p = T_{{comp}} + T_{{comm}} $$
-$$= t_{{mult}}*n^3 + t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(n^2/p)*(2p-1)$$
-$$=O(n^3 + \log{p} + \sqrt{p} + n^2*(2p-1)/p)$$
-$$=O(n^3 + \sqrt{p})$$
+\begin{eqnarray*}
+T_p 	&=& T_{{comp}} + T_{{comm}} \\
+		&=& t_{{mult}} \cdot n^3 + t_s (2 \log{p} + 3/2 \sqrt{p}) + t_w (n^2/p)(2p-1) \\
+		&=& O(n^3 + \log{p} + \sqrt{p} + n^2 (2p-1)/p) \\
+		&=& O(n^3 + \sqrt{p}) \\
+\end{eqnarray*}
+
 
 Since n is always greater than p, we can reduce this to:
 
