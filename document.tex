@@ -155,19 +155,37 @@ $9*(s/2)^2$ elements (the 7 M matrices and two temporary matrices for computing
 intermediate sums and products). Then it recursively invokes Strassen 7 times on
 blocks of size $s/2$. Therefore its memory usage is:
 
-$$f(s) = 9/4*s^2 + 7*f(s/2)$$
-$$= 9/4*s^2 + 7*9/4*(s/2)^2 + 7*7*f(s/4)$$
-$$= 9/4*(s^2 + 7/4*s^2) + 7*7*f(s/4)$$
-$$ = 9/4*( s^2 + 7/4*s^2 + (7/4)^2*s^2 ) +7^3*f(s/2^3) ... $$
-$$ = s^2 * 9/4 * (7/4 + (7/4)^2 + \dots)$$
+\begin{eqnarray*}
+f(s) &=& 9/4\cdot s^2 + 7\cdot f(s/2)	\\
+&=& 9/4\cdot  s^2 + 7\cdot  9/4\cdot  (s/2)^2 + 7\cdot  7\cdot  f(s/4)	\\
+&=& 9/4\cdot  (s^2 + 7/4\cdot  s^2) + 7\cdot  7\cdot  f(s/4)	\\
+&=& 9/4\cdot  ( s^2 + 7/4\cdot  s^2 + (7/4)^2\cdot  s^2 ) +7^3\cdot  f(s/2^3) ... 	\\
+&=& s^2 \cdot   9/4 \cdot   (7/4 + (7/4)^2 + \dots)	\\
+&=& s^2 \cdot   9/4 \cdot   \sum\limits_{i=1}^{log_2 s} (7/4)^i 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(2^{\sum\limits_{i=1}^{log_2 s} (7/4)^i}) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(\prod\limits_{i=1}^{log_2 s} 2^{(7/4)^i}) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(\prod\limits_{i=1}^{log_2 s} (7/4)^{2^i}) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   log_{7/4}(\prod\limits_{i=1}^{log_2 s} (7/4)^{2^i}) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (\sum\limits_{i=1}^{log_2 s} log_{7/4}(7/4)^{2^i}) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (\sum\limits_{i=1}^{log_2 s} 2^i) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (2^{log_2 s+1} - 1) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (2\cdot  s - 1) 	\\
+&=& s^2 \cdot   (2\cdot  s - 1) \cdot   9/4 \cdot   log_2(7/4) 	\\
+&=& (2\cdot  s^3 - s^2) \cdot   9/4 \cdot   log_2(7/4)
+\end{eqnarray*}
+
+Hence
+$$f(s) = O(s^3)$$
+
 	
-$$f(s) = O(s^2)$$
+$$f(n/\sqrt{p}) = O(n^3/p^{3/2})$$
 
-Then $f(n/\sqrt{p}) = O(n^2/p)$, thus the space complexity remains:
-$$M_p = O(n^2/p)$$
+Thus the space complexity becomes:
+$$Mp = O(n^3/p^{3/2} + n^2/p) = O(n^2/p \cdot (n/sqrt(p)+1)) = O(n^3/p^{3/2})$$
 
-For the root node, it remains:
-$$M_p = O(n^2)$$
+For the root node, it becomes:
+
+$$Mp = O(n^3/p^{3/2} + n^2) = O(n^2 \cdot (n/p^(3/2) + 1)) = O(n^3/p^{3/2})$$
 
 
 \subsubsection{Parallel computation time}
