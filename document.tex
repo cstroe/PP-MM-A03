@@ -176,13 +176,15 @@ $$= O(t_{{mult}} * n^{2.807} * p^{0.096})$$
 
 This is unchanged from the regular Cannon's algorithm:
 
-$$	T_{{comm}} = T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} =$$
-$$		= 2*T_{{scatter}} + T_{{skew}} + T_{{shift}} =$$
-$$		= t_s*2*\log{p} + t_w*2*(n^2/p)*(p-1) + \sqrt{p}/2 * (t_s + t_w*n^2/p) + \sqrt{p}*(t_s + t_w*n^2/p) =$$
-$$		= t_s*2*\log{p} + t_w*2*(n^2/p)*(p-1) + \sqrt{p}*3/2 * (t_s + t_w*n^2/p) =$$
-$$		= t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(2*(n^2/p)*(p-1) + n^2/p) =$$
-$$		= t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(n^2/p)*(2*(p-1) + 1) =$$
-$$		= t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(n^2/p)*(2p-1)$$
+\begin{eqnarray*}
+T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
+			&=& 2 T_{{scatter}} + T_{{skew}} + T_{{shift}} \\
+			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p}/2 \cdot (t_s + t_w \cdot n^2/p) + \sqrt{p}(t_s + t_w \cdot n^2/p) \\
+			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p} \cdot 3/2 \cdot (t_s + t_w \cdot n^2/p) \\
+			&=& t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (2 \cdot (n^2/p)(p-1) + n^2/p) \\
+			&=& t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p)(2*(p-1) + 1) \\
+			&=& t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p)(2p-1) \\
+\end{eqnarray*}
 
 \subsubsection{Parallel run-time}
 
