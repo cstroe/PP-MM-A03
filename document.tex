@@ -249,8 +249,8 @@ $$	T_p = O(n^{2.807} \cdot  p^{-0.9035})$$
 The DNS algorithm is based on decomposing the intermediate data of the matrix
 multiplication algorithm and we chose it because we wanted to explore the effect
 of this data decomposition method on our running time. One of the main
-differences from Cannon's algorithm is that it uses a 3D mesh topology, and
-requires the the number of processors be a perfect cube (i.e., $p = q^3$). Each
+differences from Cannon's algorithm is that it uses a 3D mesh topology of $q \times q \times q$ processors, and
+requires the total number of processors to be a perfect cube (i.e., $p = q^3$). Each
 processor $P_{i,j,k}$ in the 3D mesh computes the multiplication of the
 $A_{i,k}$ and $B_{k,j}$ elements.  In order to make DNS algorithm cost efficient
 for $p < n$, each processor receives a submatrix of the A and B matrices, each
@@ -262,23 +262,19 @@ gathered at the root processor (rank = 0);
 
 \begin{figure}
 
-\begin{pseudocode}[ruled]{DNS\_Matrix\_Multiplication}{n,k}
-\CALL{Create\_3D\_Mesh}{} \\
-A \GETS \CALL{AllocateMatrix}{n} \\
-B \GETS A \\
-i \GETS 1 \\
+\begin{pseudocode}[ruled]{DNS\_Matrix\_Multiplication}{A, B}
+\CALL{Create\_3D\_Mesh}{} \vspace{10pt} \\
 
-\WHILE i < k \DO
-\BEGIN
-	Asub \GETS \CALL{MPI\_Scatter\_on\_I-K}{A} \\
-	Bsub \GETS \CALL{MPI\_Scatter\_on\_K-J}{B} \\
-	Csub \GETS \CALL{SerialMatrixMultiply}{Asub, Bsub} \\
-	
-	Cred \GETS \CALL{MPI\_Reduce\_on\_K}{Csub} \\
-	C \GETS \CALL{MPI\_Gather\_on\_I-J}{Cred} \\
+Ablock \GETS \CALL{MPI\_Scatter\_on\_I-K}{A} \\
+Asub \GETS \CALL{MPI\_Broadcast\_on\_J}{Ablock} \vspace{10pt} \\
 
-	B \GETS C \\
-\END \vspace{10pt} \\
+Bblock \GETS \CALL{MPI\_Scatter\_on\_K-J}{B} \\
+Bsub \GETS \CALL{MPI\_Broadcast\_on\_I}{Bblock} \vspace{10pt} \\
+
+Csub \GETS \CALL{SerialMatrixMultiply}{Asub, Bsub} \vspace{10pt} \\
+
+Cred \GETS \CALL{MPI\_Reduce\_on\_K}{Csub} \\
+C \GETS \CALL{MPI\_Gather\_on\_I-J}{Cred} \vspace{10pt} \\
 
 \RETURN{C}
 \end{pseudocode}
@@ -291,40 +287,61 @@ i \GETS 1 \\
 Since a cost efficient formulation of the DNS algorithm uses $p < n$, each
 processor gets an $(n/q \times n/q)$ submatrix, where $q = \sqrt[3]{p}$, for
 each matrix $A$ and $B$.  It also stores the output matrix $C$.  Therefore the
-local storage requirements for the DNS algorithm is $3 \cdot n^2 / q^2$ at each
+local storage requirements for the DNS algorithm is $$3 \cdot {\left(\frac{n}{\sqrt[3]{p}}\right)}^2 = O\left(\frac{n^2}{p^{2/3}}\right)$$ at each
 processor.
 
 \subsubsection{Parallel Computation Time (Local Computations)}
 
-Each processor has to serial multiply its submatrices which takes $(n^2/q^2)^3 =
-n^5/q^5$ time with the naive matrix multiplication algorithm (if using
-Strassen's algorithm this time is $n^{5.614}/q^{5.614}$).  Therefore the
-overall time spent for local computations is $$T_{{comp}} = p\cdot
-\frac{n^5}{q^5} = q^3 \cdot \frac{n^5}{q^5} = \frac{n^5}{q^2}$$
+Each processor has to serial multiply its submatrices, which are square matrices with dimension $ n/\sqrt[3]{p}$, therefore the
+overall time spent for local computations is 
+$$T_{{comp}} = \left(\frac{n}{\sqrt[3]{p}}\right)^3 = \frac{n^3}{p}$$
 
 \subsubsection{Parallel Communication Time}
 
 The parallel communication time comes from the following operations:
 \begin{itemize}
-  \item Scatter on 2D mesh with each dimension having q processors (done twice).
-  \item Broadcast on a ring with q processors (done twice).
-  \item Reduce on a ring with q processors.
-  \item Gather on 2D mesh with each dimension having q processors.
+  \item Two scatter operations for matrices A and B on a 2D mesh, with each mesh dimension having $q = \sqrt[3]{p}$ processors, 
+  and the message size $m = (n/q)^2 = n^2/p^{2/3}$.
+	\begin{eqnarray*}
+  			T_{{scatter},{mesh}} &=& 2 \left[ t_s \log{q} + t_w  m (q-1) \right] \\
+  								 &=& 2 \left[ t_s \log{\sqrt[3]{p}} + t_w \left( \frac{n}{\sqrt[3]{p}} \right)^2 (\sqrt[3]{p} - 1) \right] \\
+   								 &=& 2 \left[ \frac{1}{3} t_s  \log{p} + t_w  \frac{n^2}{\sqrt[3]{p}} - t_w \frac{n^2}{\sqrt[3]{p}^2}  \right]		 
+  	\end{eqnarray*}
+  \item Two one-to-all broadcast on a ring with $q = \sqrt[3]{p}$ processors and message size $m = (n/q)^2 = n^2/p^{2/3}$.
+  	\begin{eqnarray*}
+  		 T_{{broadcast},{ring}} &=& 2 (t_s + t_w\cdot m) \log{p} \\
+  		 						&=& \frac{2}{3} \left(t_s + t_w \frac{n^2}{p^{2/3}}\right) \log{p} \\
+  		 						&=& \frac{2}{3} \left( t_s \log{p} + t_w \log{p} \frac{n^2}{p^{2/3}} \right)
+  	\end{eqnarray*}
+  \item Reduce on a ring with $q = \sqrt[3]{p}$ processors.  This time is identical to the one-to-all broadcast.
+  \item Gather the final matrix, on a 2D mesh with each dimension having $q = \sqrt[3]{p}$ processors.  This time is also identical 
+  to the time it takes to do one scatter operation, and can be easily derived from the scatter formula above.
 \end{itemize}
 
-On a 2D mesh the time for a doing a scatter or a gather is
-$$T_{{scatter~or~gather},{mesh}} = t_s \log{p} + t_w  m (p-1)$$ and for our
-problem $m = n^2$ and $p = q^2$.  The reduction on a ring takes
-$$T_{{reduce~or~broadcast},{ring}} = (t_s + t_w\cdot m) \log{p} $$ where for our
-problem $m = n^2 / q^2$ and $p = q$.  Therefore our total communication time is:
-$$T_{{comm}} = O(\log{n} + n^2 q^2 + \frac{n^2 \log{q}}{q^2} )$$ showing the the
-gather and scatter operations will be the most time consuming communication
-operations.
+Therefore our total communication time is:
+\begin{eqnarray*}
+T_{{comm}} &=& T_{{scatter},{gather}} + T_{{broadcast},{reduce}} \\
+		   &=& 3 \left( \frac{1}{3} t_s  \log{p} + t_w  \frac{n^2}{\sqrt[3]{p}} - t_w \frac{n^2}{\sqrt[3]{p}^2}  \right) +
+		     \frac{3}{3} \left( t_s \log{p} + t_w \log{p} \frac{n^2}{p^{2/3}} \right) \\
+		   &=& 2 t_s \log{p} + 3 t_w \left( \frac{n^2}{{p}^{1/3}} \right) + t_w \frac{n^2}{p^{2/3}} (\log{p} - 3)
+\end{eqnarray*}
 
 \subsubsection{Parallel Run Time}
 
-Using the formula $T_p = T_{{comm}} + T_{{comp}}$ we get that $$T_p = O(n^2
-q^2) = O(n^2 p^{2/3})$$
+Using the formula $T_p = T_{{comp}} + T_{{comm}}$ we get that 
+\begin{eqnarray*}
+T_p &=& \frac{n^3}{p} + 2 t_s \log{p} + 3 t_w \left( \frac{n^2}{{p}^{1/3}} \right) + t_w \frac{n^2}{p^{2/3}} (\log{p} - 3)
+\end{eqnarray*}
+
+\subsubsection{Speedup}
+
+\begin{eqnarray*}
+S = \frac{T_s}{T_p} = 
+\end{eqnarray*}
+
+\subsubsection{Efficiency}
+
+\subsubsection{Iso-Eficiency Function}
 
 \subsection{LU Decomposition using 2D paritioning (optimized)}
 
