@@ -478,47 +478,48 @@ optimal $$O(n) = O(p^{2/3})$$
 For our problem of matrix multiplication, $W = n^3$, so therefore the isoefficiency function becomes:
 $$W = O(p^2)$$
 
-\subsection{LU Decomposition using 2D paritioning (optimized)}
+\subsection{LU Decomposition using 2D partitioning}
 
-As part of our effort to reduce the running time of the overall algorithm
-(matrix multiplication plus computing the determininat) we updated our LU-2D
-decomposition algorithm from our implementation in Assignment 02 by removing all
-broadcast communications and opting for pipelined communication.  This greatly
-reduced the running time of our algorithm.
+The naive algorithm for computing the determinant seems quite parallelizable, but its factorial time complexity is unattractive. Instead, we decided to perform LU factorization in order to compute the determinant quickly.
 
-\subsection{LU Decomposition using 1D partitioning (new)}
+From assignment 2, we already had an implementation of LU decomposition using 2D partitioning of the matrix. We improved on it by getting rid of all broadcast calls and replacing them with pipelined communications. This brought a significant performance improvement. However, due to the significant likelihood of zeros in the matrix, we have to perform at least partial pivoting, and this puts a hamper on pipelining, because it forces us to perform an all-reduce operation along a column to choose the pivot element for each iteration of the algorithm.
 
+% for diag from 1 to n:
+%	all_reduce pivot along column
+%	pipeline pivot to the right
+%	calculate ms on pivot column
+%	for each column to the right of pivot column:
+%		eliminate
+%		pipeline pivot row item downwards
 
-The DNS algorithm requires a perfect cube number of processors ($p = q^3$) while
-the LU decomposition using a 2D mesh requires a perfect square number of
-processors.  Because of the limitations on ARGO, the DNS algorithm can only run
-with 8 processes and this is not compatible with our 2D LU decomposition
-algorithm.
+This means that, once a pivot has been chosen, the elimination phase proceeds in a pipelined fashion: each processor receives the pivot, computes (or receives) the m values for the cells on the pivot column, sends them to the processor to its right, receives the a value for each cell on the pivot row, forwards the value downwards and performs elimination: the elimination front proceeds diagonally down and to the right, and most computations are performed behind the front.
+However, before the computations for the next iteration can begin, a new pivot needs to be chosen for the next row, which forces all processors to wait until the elimination front has traversed all processors.
 
-In order resolve this problem, we also implemented LU Decomposition using 1D
-paritioning on a ring topology.  The assignment of the rows were done in a
-cyclic fashion in order to balance the workload over all the processors as the
-decomposition progresses.
+Another drawback of this algorithm is that it requires that the number of processors be a perfect square, which makes it difficult to use with the DNS matrix multiplication algorithm, which requires a number of processors which is a cube. The minimum number of processors that satisfied both conditions (apart from the trivial $1$, of course) is $2^6 = 64$, but we cannot get access to so many processors on Argo.
 
-\subsection{Strassen's Matrix Multiplication (serial formulation)}
+\subsection{LU Decomposition using 1D partitioning}
 
-In order to further improve performance, we implemented the serial version of
-Strassen's matrix multiplication algorithm, which we run instead of the naive
-matrix multiplication at each node when multiplying the sub matrices distributed
-to each node.  The main benefit of Strassen's matrix multiplication is that the
-runtime of the algorithm is $\approx O(N^{2.807})$, allowing us to save time
-over the standard matrix multiplication with runtime of $O(N^3)$ when dealing
-with large matrices .
+To avoid the drawbacks with the 2D partitioned version of LU decomposition, we implemented a new formulation of the LU algorithm, using 1D partitioning over rows. The processors are arranged in a ring, and each processor holds $n/p$ rows of the matrix. To improve load balancing, the rows are not divided into blocks, but rather they are assigned to each processor in a cyclic way: processor $k$ gets the rows whose row number $i = k (mod p)$ (here both $i$ and $k$ are zero-based indices).
+
+% for r from 1 to n:
+%	if I have row r:
+%		choose pivot on row r
+%	pipeline the pivot and the pivot row downwards
+%	perform elimination on each row after r
+
+Since the pivot choice is performed by a single processor, there are no obstacles to pipelining: once the first pivot has been chosen and send down, the processor holding the next row (which is the next processor down on the ring) can immediately perform elimination, choose the pivot for the next row, and send it down. The third processor receives the second pivot row immediately after the first, and so on. The computation proceeds downwards like an unbroken wave, with computation overlapping communication.
+
+This new version of the algorithm proved much faster than the 2D one: after running a special test to compare the two, we used the 1D decomposition for all other tests.
 
 \section{Parameter Ranges}
 
-Each of the programs were tested with $n \times n$ matrix input sizes of $$n =
+Each of the programs was tested with $n \times n$ matrix input sizes of $$n =
 \{ 16, 64, 256, 512, 1024, 2048, 4096 \}$$ with powers of $$k=\{ 2, 4, 8,
-16 \}$$ and with processors $p$ and cores $c$ ranging from $$(p,c) = \{ (1,4),
+16 \}$$ and with processors $p$ and cores $c$ ranging in $$(p,c) = \{ (1,4),
 (2,2), (4,1), (4,4), (8,2) \}$$
 
-The DNS algorithm can only be run with a perfect cube number of processes, and
-on ARGO that limits us to 8 processes.
+Note that the DNS algorithm can only be run with a perfect cube number of processes, and
+on ARGO that limits us to 8 processes, as we did not want to make use of virtual processors.
 
 \section{Results}
 
