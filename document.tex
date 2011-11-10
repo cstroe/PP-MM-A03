@@ -574,7 +574,16 @@ Our version of LU decomposition from assignment 2 required a square grid, and th
 %     \label{fig:all_results}
 % \end{figure}
 
-%\section{Lessons}
+\section{Lessons}
+
+We found that it can be very beneficial to modularize the tasks performed by a program, and to separate the parallel and serial aspects. For this assignment we had two different parallel decompositions of matrix multiplication (Cannon's and DNS), two different serial formulations (naive and Strasser's), and two different formulations of the LU decomposition task (1D and 2D), and we were able to mix and match them freely and determine which was the best combination. It turned out that creating a hybrid of two different approaches (Cannon's and Strasser's) can produce much better results than taking each separately.
+
+For LU factorization, we saw that the importance of communication and pipelining cannot be overestimated. In this part of the program, profiling was very important to determine where time was being spent; although we removed these calls from the final program for the sake of clarity, we performed a poor man's profiling by accumulating the time spent in several key spots (for instance, in each MPI call in LU-2D). This allowed us to gauge the true impact of our use of MPI broadcasting primitives, and led first to a much improved implementation of LU-2D using pipelining, and then to its replacement with a different formulation that could make even better use of pipelining.
+
+We also improved our scripts for running experiments and collecting data, allowing us to automate the generation of not only tables, but also of graphs. It is definitely work it to put in time to automate these tasks up front, as it allowed us easily to keep refining our results as new test batches were run.
+
+On the other hand, we realized that it is perhaps better not to get too carried away with the coding, and to begin working on the report earlier. Ideally, the two tasks should be pipelined, so that the report for a first formulation of the problem gets written while coding the second: this would improve system resilience by allowing us to present a complete product (albeit of smaller scope) in case our task runs into a processing time limit.
+
 
 \clearpage
 
