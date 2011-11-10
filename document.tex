@@ -17,7 +17,7 @@
 \author{Camillo Lugaresi and Cosmin Stroe \vspace{20pt} \\ Department of Computer Science \\
 University of Illinois at Chicago}
 
-\date{\today}
+\date{November 8, 2011}
 
 \begin{document}
 
@@ -392,12 +392,12 @@ The parallel communication time comes from the following operations:
   	\end{eqnarray*}
   \item Two one-to-all broadcast on a ring with $q = \sqrt[3]{p}$ processors and message size $m = (n/q)^2 = n^2/p^{2/3}$.
   	\begin{eqnarray*}
-  		 T_{{broadcast},{ring}} &=& 2 (t_s + t_w\cdot m) \log{p} \\
+  		 T_{{broadcast},{ring}} &=& 2 (t_s + t_w\cdot m) \log{q} \\
   		 						&=& \frac{2}{3} \left(t_s + t_w \frac{n^2}{p^{2/3}}\right) \log{p} \\
   		 						&=& \frac{2}{3} \left( t_s \log{p} + t_w \log{p} \frac{n^2}{p^{2/3}} \right)
   	\end{eqnarray*}
   \item Reduce on a ring with $q = \sqrt[3]{p}$ processors.  This time is identical to the one-to-all broadcast.
-  \item Gather the final matrix, on a 2D mesh with each dimension having $q = \sqrt[3]{p}$ processors.  This time is also identical 
+  \item Gather the final matrix, on a 2D mesh with each dimension having $q = \sqrt[3]{p}$ processors.  This time is identical 
   to the time it takes to do one scatter operation, and can be easily derived from the scatter formula above.
 \end{itemize}
 
@@ -419,12 +419,42 @@ T_p &=& \frac{n^3}{p} + 2 t_s \log{p} + 3 t_w \left( \frac{n^2}{{p}^{1/3}} \righ
 \subsubsection{Speedup}
 
 \begin{eqnarray*}
-S = \frac{T_s}{T_p} = 
+S &=& \frac{T_s}{T_p} \\
+  &=& \frac{n^3}{\frac{n^3}{p} + 2 t_s \log{p} + 3 t_w \left( \frac{n^2}{{p}^{1/3}} \right) + t_w \frac{n^2}{p^{2/3}} (\log{p} - 3)} \\
+  &=& \frac{1}{ \frac{1}{p} + 2 t_s \frac{\log{p}}{n^3} + \frac{3 t_w}{p^{1/3} n} + \frac{t_w (\log{p} - 3)}{p^{2/3} n} } \\
+  &=& \frac{p}{   1 + 2 t_s \frac{ p \log{p} }{ n^3 } + 3 t_w \frac{p^{2/3}}{n} + t_w \frac{p^{1/3} (\log{p} - 3)}{n}      }
+\end{eqnarray*}
+
+It can be seen from the equation that as the matrix increases in size, the speedup tends to become linear.
+
+\subsubsection{Cost}
+
+\begin{eqnarray*}
+C &=& p T_p \\
+  &=& n^3 + 2 t_s p \log{p} + 3 t_w p^{2/3} n^2 + t_w p^{1/3} n^2 (\log{p} - 3)
 \end{eqnarray*}
 
 \subsubsection{Efficiency}
 
-\subsubsection{Iso-Eficiency Function}
+\begin{eqnarray*}
+E &=& \frac{T_s}{p T_p} = \frac{S}{p} \\
+  &=& \frac{1}{   1 + 2 t_s \frac{ p \log{p} }{ n^3 } + 3 t_w \frac{p^{2/3}}{n} + t_w \frac{p^{1/3} (\log{p} - 3)}{n} } \\
+\end{eqnarray*}
+
+\subsubsection{Cost optimality and Isoefficiency function}
+
+In order for our algorithm to be cost optimal with regards to the serial formulation, the efficiency must remain constant as the
+number of processors and the size of the matrices being multiplied increase.  In our case the efficiency is:
+
+\begin{eqnarray*}
+E &=& \frac{1}{   1 + 2 t_s \frac{ p \log{p} }{ n^3 } + 3 t_w \frac{p^{2/3}}{n} + t_w \frac{p^{1/3} (\log{p} - 3)}{n} }
+\end{eqnarray*}
+
+and asymptotically the $p^{2/3}/n$ term dominates all the other terms in the denominator, and therefore, in order for the algorithm to be cost 
+optimal $$O(n) = O(p^{2/3})$$
+
+For our problem of matrix multiplication, $W = n^3$, so therefore the isoefficiency function becomes:
+$$W = O(p^2)$$
 
 \subsection{LU Decomposition using 2D paritioning (optimized)}
 
