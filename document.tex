@@ -198,6 +198,8 @@ W &=& k \cdot p^3 \\
 
 \subsection{Cannon's algorithm with local multiplication using Strassen}
 
+This is a variant of the previous algorithm, where each processor computes the local products using Strassen's multiplication algorithm instead of the naive multiplication algorithm. This increases memory usage (although Cannon's decomposition remains memory-efficient), but reduces the computation time for large matrices.
+
 \subsubsection{Local memory usage}
 
 In addition to the normal memory usage for Cannon's algorithm, we must consider
