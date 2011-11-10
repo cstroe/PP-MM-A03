@@ -61,6 +61,34 @@ plot 'cannon-dns-1024-4.txt' using 2:xticlabels(1) with lines lw 3 title "cannon
      'cannon-dns-1024-4.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
      'cannon-dns-1024-4.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
 
+set output '| ps2pdf - ../images/cannon-dns-256-16.pdf'
+
+plot 'cannon-dns-256-16.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
+     'cannon-dns-256-16.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
+     'cannon-dns-256-16.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
+     'cannon-dns-256-16.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
+
+set output '| ps2pdf - ../images/cannon-dns-256-8.pdf'
+
+plot 'cannon-dns-256-8.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
+     'cannon-dns-256-8.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
+     'cannon-dns-256-8.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
+     'cannon-dns-256-8.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
+
+set output '| ps2pdf - ../images/cannon-dns-256-2.pdf'
+
+plot 'cannon-dns-256-2.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
+     'cannon-dns-256-2.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
+     'cannon-dns-256-2.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
+     'cannon-dns-256-2.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
+
+set output '| ps2pdf - ../images/cannon-dns-256-4.pdf'
+
+plot 'cannon-dns-256-4.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
+     'cannon-dns-256-4.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
+     'cannon-dns-256-4.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
+     'cannon-dns-256-4.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
+
 set output '| ps2pdf - ../images/cannon-dns-4096-16.pdf'
 
 plot 'cannon-dns-4096-16.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
@@ -116,34 +144,6 @@ plot 'cannon-dns-64-4.txt' using 2:xticlabels(1) with lines lw 3 title "cannon",
      'cannon-dns-64-4.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
      'cannon-dns-64-4.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
      'cannon-dns-64-4.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
-
-set output '| ps2pdf - ../images/cannon-dns-256-16.pdf'
-
-plot 'cannon-dns-256-16.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
-     'cannon-dns-256-16.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
-     'cannon-dns-256-16.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
-     'cannon-dns-256-16.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
-
-set output '| ps2pdf - ../images/cannon-dns-256-8.pdf'
-
-plot 'cannon-dns-256-8.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
-     'cannon-dns-256-8.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
-     'cannon-dns-256-8.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
-     'cannon-dns-256-8.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
-
-set output '| ps2pdf - ../images/cannon-dns-256-2.pdf'
-
-plot 'cannon-dns-256-2.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
-     'cannon-dns-256-2.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
-     'cannon-dns-256-2.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
-     'cannon-dns-256-2.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
-
-set output '| ps2pdf - ../images/cannon-dns-256-4.pdf'
-
-plot 'cannon-dns-256-4.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \
-     'cannon-dns-256-4.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \
-     'cannon-dns-256-4.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \
-     'cannon-dns-256-4.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
 
 set output '| ps2pdf - ../images/cannon-dns-16-16.pdf'
 

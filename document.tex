@@ -522,58 +522,83 @@ on ARGO that limits us to 8 processes.
 
 \section{Results}
 
-Tables \ref{tab:cannontotal}, \ref{tab:cannon -stotal}, \ref{tab:dnstotal} and \ref{tab:dns -stotal} show the total runtime for the Cannon, Cannon/Strassen, DNS and DNS/Strassen formulations under a variety of values of $p$ (processing node count), $c$ (core count per node), $n$ (matrix side) and $k$ (power). Tables \ref{tab:cannonmatrix multiplication}, \ref{tab:cannon -smatrix multiplication}, \ref{tab:dnsmatrix multiplication}, \ref{tab:dns -smatrix multiplication} show the timings for matrix multiplication alone, while \ref{tab:cannonLU}, \ref{tab:cannon -sLU}, \ref{tab:dnsLU}, \ref{tab:dns -sLU} show the timings for the LU decomposition and determinant calculation.
+Tables \ref{tab:cannontotal}, \ref{tab:cannon -stotal}, \ref{tab:dnstotal} and
+\ref{tab:dns -stotal} show the total runtime for the Cannon, Cannon/Strassen,
+DNS and DNS/Strassen formulations under a variety of values of $p$ (processing
+node count), $c$ (core count per node), $n$ (matrix side) and $k$ (power).
+Tables \ref{tab:cannonmatrix multiplication}, \ref{tab:cannon -smatrix
+multiplication}, \ref{tab:dnsmatrix multiplication}, \ref{tab:dns -smatrix
+multiplication} show the timings for matrix multiplication alone, while
+\ref{tab:cannonLU}, \ref{tab:cannon -sLU}, \ref{tab:dnsLU}, \ref{tab:dns -sLU}
+show the timings for the LU decomposition and determinant calculation.
 
-All of the timings above use the 1D version of LU. We chose it after developing and evaluating two different formulations: the comparison between them is provided in tables \ref{tab:lucompare_total} and \ref{tab:lucompare_LU}.
+All of the timings above use the 1D version of LU. We chose it after developing
+and evaluating two different formulations: the comparison between them is
+provided in tables \ref{tab:lucompare_total} and \ref{tab:lucompare_LU}.
 
 \clearpage
 \input{results.tex}
 \clearpage
 
-\section{Analysis}
+\section{Analysis and Lessons}
 
-We applied Cannon's parallelization to two different matrix multiplication algorithms: the naive one, which is $O(n^3)$, and Strassen's, which is $O(n^{2.807})$. The communication overhead is exactly the same, but Strassen's computation time is $t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035}$, compared to $t_{mult} \cdot n^3 / p$: therefore, the version using Strassen's has a better runtime. However, its isoefficiency function is worse: $k \cdot p^{3.3587}$ compared to $k \cdot p^3$.
+We applied Cannon's parallelization to two different matrix multiplication
+algorithms: the naive one, which is $O(n^3)$, and Strassen's, which is
+$O(n^{2.807})$. The communication overhead is exactly the same, but Strassen's
+computation time is $t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035}$, compared to
+$t_{mult} \cdot n^3 / p$: therefore, the version using Strassen's has a better
+runtime. However, its isoefficiency function is worse: $k \cdot p^{3.3587}$
+compared to $k \cdot p^3$.
 
-The results show that Strassen's algorithm can be slightly slower for small matrices, but becomes strongly advantageous for large matrices. We could obtain the best of both worlds by falling back to the naive algorithms when Strassen is called for small matrices; this also occurs at the deepest levels of recursion when running Strassen on a large matrix, so it may bring a small improvement in that case as well.
+Comparing Cannon's algorithm with DNS, Cannon's has better local memory usage
+than DNS, however, we can see from the isoefficiency function that DNS is more scalable.  So we are
+trading off memory usage for problem scalability.
 
-It is difficult to compare Cannon and DNS from the result tables, since the former algorithm requires a number of processors that is a square number, while the latter requires a cube. The smallest number of processors that would satisfy both is $2^6 = 64$, but we do not have
- that many processors available on Argo. However, by interpolating the measurements, DNS does not appear to be faster than Cannon's. This becomes evident in the graph in figure \ref{fig:cannon-dns}.
+The results show that Strassen's algorithm can be slightly slower for small
+matrices, but becomes advantageous for large matrices, as can be seen for matrix of size 4096 in Figure \ref{fig:cannon-dns-n}. We could obtain
+the best of both worlds by falling back to the naive algorithms when Strassen is
+called for small matrices; this also occurs at the deepest levels of recursion
+when running Strassen on a large matrix, so it may bring a small improvement in
+that case as well.
 
-Our version of LU decomposition from assignment 2 required a square grid, and thus was not directly compatible with DNS. We implemented a new version with
-1D decomposition, which is much faster due to improved pipelining.
+It is difficult to compare Cannon and DNS from the result tables, since the
+former algorithm requires a number of processors that is a square number, while
+the latter requires a cube. The smallest number of processors that would satisfy
+both is $2^6 = 64$, but we do not have
+that many processors available on Argo. However, by interpolating the
+ measurements, DNS does not appear to be faster than Cannon's. This becomes
+ evident in the graph in Figure \ref{fig:cannon-dns-p}.
+
+Our version of LU decomposition from assignment 2 required a square grid, and
+thus was not directly compatible with DNS. We implemented a new version with 1D
+decomposition, which is we made much faster by implementing pipelining communication with \texttt{MPI\_SendRecv} instead of \texttt{MPI\_Bcast} operations.
 
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1.0\textwidth]{images/finished/cannon-dns-1024-2.pdf}
-    \caption{Runtimes of Cannon's and DNS algorithms with naive and strassen's
+    \caption{Runtimes of Cannon's and DNS algorithms with naive and Strassen's
     serial matrix multiplication algorithms for $n = 1204$ and $k = 2$.}
-    \label{fig:cannon-dns}
+    \label{fig:cannon-dns-p}
 \end{figure}
 
-% 
-% \begin{figure}
-% 	\centering
-% 	\includegraphics[width=0.8\textwidth]{images/r-lub}
-%     \caption{Runtimes of LU without pivoting using MPI\_BCast.}
-%     \label{fig:lub_results}
-% \end{figure}
-% 
-% \begin{figure}
-% 	\centering
-% 	\includegraphics[width=0.8\textwidth]{images/r-lubp}
-%     \caption{Runtimes of LU with pivoting using MPI\_BCast.}
-%     \label{fig:lubp_results}
-% \end{figure}
-% 
-% \begin{figure}
-% 	\centering
-% 	\includegraphics[width=0.8\textwidth]{images/r-all}
-%     \caption{Comparison of all algorithm with $n=16$.}
-%     \label{fig:all_results}
-% \end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.0\textwidth]{images/finished/cannon-dns-over-n-k-2.pdf}
+    \caption{Runtimes of Cannon's algrithm with $(p,c) = (4,1)$ and DNS
+    algorithm with $(p,c) = (4,2)$ with naive and Strassen's serial matrix
+    multiplication algorithms over $n$ for $k = 2$.}
+    \label{fig:cannon-dns-n}
+\end{figure}
 
-%\section{Lessons}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.0\textwidth]{images/finished/cannon-dns-over-k-n-1024.pdf}
+    \caption{Runtimes of Cannon's algrithm with $(p,c) = (4,1)$ and DNS
+    algorithm with $(p,c) = (4,2)$ with naive and Strassen's serial matrix
+    multiplication algorithms over $k$ for $n = 1024$.}
+    \label{fig:cannon-dns-k}
+\end{figure}
 
 \clearpage
 
