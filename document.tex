@@ -131,14 +131,21 @@ T_{{comm}} &=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
 
 \begin{eqnarray*}
 T_p &=& T_{{comp}} + T_{{comm}} \\
-&=& t_{{mult}} \cdot n^3 + t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p) \cdot (2p-1) \\
-&=& O(n^3 + \log{p} + \sqrt{p} + n^2 \cdot (2p-1)/p) \\
-&=& O(n^3 + \sqrt{p})
+&=& t_{{mult}} \cdot n^3 / p + t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p) \cdot (2p-1) \\
+&=& O(n^3 / p + \log{p} + \sqrt{p} + n^2 \cdot (2p-1)/p)
 \end{eqnarray*}
 
-Since $n$ is always greater than $p$, we can reduce this to:
+\subsubsection{Speedup}
 
-$$T_p = O(n^3)$$
+For the reference serial algorithm, we will use the naive multiplication algorithm here.
+
+\begin{eqnarray*}
+S &=& T_s / T_p \\
+&=& \frac{n^3}{n^3 / p + \log{p} + \sqrt{p} + n^2 \cdot (2p-1)/p} \\
+&=& \frac{pn^3}{ n^3 + p\log{p} + p\sqrt{p} + n^2 \cdot (2p-1)} \\
+&=& \frac{pn^3}{ p\log{p} + p\sqrt{p} + n^2 \cdot (2p+n-1)}
+\end{eqnarray*}
+
 
 \subsection{Cannon's algorithm with local multiplication using Strassen}
 
