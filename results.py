@@ -239,7 +239,7 @@ set bmargin 0
 set tmargin 0
 set rmargin 1
 
-set terminal postscript enhanced color""")
+set terminal postscript enhanced color\n""")
 	for n in nset:
 		for k in kset:
 			name = "cannon-dns-%d-%d" % (n,k)
@@ -248,7 +248,7 @@ set terminal postscript enhanced color""")
 plot '%s.txt' using 2:xticlabels(1) with lines lw 3 title "cannon", \\
      '%s.txt' using 3:xticlabels(1) with lines lw 3 title "cannon strassen", \\
      '%s.txt' using 4:xticlabels(1) with lines lw 3 title "dns", \\
-     '%s.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"
+     '%s.txt' using 5:xticlabels(1) with lines lw 3 title "dns strassen"\n
 """ % (name, name, name, name, name))
 
 # SEP=":"
