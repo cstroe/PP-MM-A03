@@ -147,9 +147,20 @@ For the reference serial algorithm, we will use the naive multiplication algorit
 \begin{eqnarray*}
 S &=& T_s / T_p \\
 &=& \frac{n^3}{n^3 / p + \log{p} + \sqrt{p} + n^2 \cdot (2p-1)/p} \\
-&=& \frac{pn^3}{ n^3 + p\log{p} + p\sqrt{p} + n^2 \cdot (2p-1)} \\
-&=& \frac{pn^3}{ p\log{p} + p\sqrt{p} + n^2 \cdot (2p+n-1)}
+&=& \frac{pn^3}{ n^3 + n^2 (2p-1) + p\sqrt{p} + p\log{p} } \\
+%&=& \frac{pn^3}{ O(p\sqrt{p} + n^2 \cdot (2p+n)) } \\
+%&=& O(\frac{pn^3}{ n^3 + 2n^2p + p\sqrt{p} }) \\
+%&=& O(\frac{1}{ \frac{ n^3 + p\sqrt{p} + 2n^2p }{pn^3} }) \\
+%&=& O(\frac{1}{ 1/p + 2/n + \frac{ \sqrt{p} }{n^3} }) \\
+%&=& O(\frac{n^3 + (p-1)n^3}{ n^3 + 2n^2p + p\sqrt{p} }) \\
+%&=& O(\frac{p}{ 1 + 2p/n + p\sqrt{p}/n^3 })
+&=& \frac{p}{ 1 + \frac{2p-1}{n} + \frac{p(\sqrt{p} + \log{p})}{n^3} } \\
 \end{eqnarray*}
+
+If $n$ grows much larger than $p$, the denominator approaches $1$, and so the system approaches linear speedup.
+
+\subsubsection{Efficiency}
+
 
 
 \subsection{Cannon's algorithm with local multiplication using Strassen}
