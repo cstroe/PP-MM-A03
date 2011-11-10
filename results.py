@@ -185,13 +185,14 @@ for stage in [ 'total', 'LU']:
 
 
 # program comparison graphs
+proclist = sorted(proccoresets.keys())
 progl = ['cannon', 'cannon -s', 'dns', 'dns -s']
 SEP=":"
 with open("graphs.txt", "w") as f:
 	for n in nset:
 		for k in kset:
 			f.write( "(%d,%d) " % (n, k) )
-			f.write( ','.join(progl) + "\n" )
+			f.write( ','.join(progl) + "\n\n" )
 			for procs in proclist:
 				for cores in proccoresets[procs]:
 					f.write( "(%d,%d)" % (procs, cores) )
