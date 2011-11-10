@@ -530,14 +530,13 @@ All of the timings above use the 1D version of LU. We chose it after developing 
 
 We applied Cannon's parallelization to two different matrix multiplication algorithms: the naive one, which is $O(n^3)$, and Strassen's, which is $O(n^{2.807})$. The communication overhead is exactly the same, but Strassen's computation time is $t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035}$, compared to $t_{mult} \cdot n^3 / p$: therefore, the version using Strassen's has a better runtime. However, its isoefficiency function is worse: $k \cdot p^{3.3587}$ compared to $k \cdot p^3$.
 
-It is difficult to compare Cannon and DNS directly, since the former algorithm requires a number of processors
- that is a square number, while the latter requires a cube. The smallest number of processors that would satisfy both is $2^6 = 64$, but we do not have
- that many processors available on Argo. However, by interpolating the measurements, DNS does not appear to be faster than Cannon's.
+The results show that Strassen's algorithm can be slightly slower for small matrices, but becomes strongly advantageous for large matrices. We could obtain the best of both worlds by falling back to the naive algorithms when Strassen is called for small matrices; this also occurs at the deepest levels of recursion when running Strassen on a large matrix, so it may bring a small improvement in that case as well.
+
+It is difficult to compare Cannon and DNS from the result tables, since the former algorithm requires a number of processors that is a square number, while the latter requires a cube. The smallest number of processors that would satisfy both is $2^6 = 64$, but we do not have
+ that many processors available on Argo. However, by interpolating the measurements, DNS does not appear to be faster than Cannon's. This becomes evident in the graph in figure \ref{fig:cannon-dns}.
 
 Our version of LU decomposition from assignment 2 required a square grid, and thus was not directly compatible with DNS. We implemented a new version with
 1D decomposition, which is much faster due to improved pipelining.
-
-Strassen's algorithm barely edges out the naive algorithm in our tests; we would need larger matrices to see a significant difference.
 
 
 \begin{figure}
@@ -571,8 +570,6 @@ Strassen's algorithm barely edges out the naive algorithm in our tests; we would
 
 %\section{Lessons}
 
-\newpage
-~
 
 \includepdf[pages={-}]{code/pdf/cannon-c.pdf}
 \includepdf[pages=-]{code/pdf/cannon-h.pdf}
