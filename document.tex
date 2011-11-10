@@ -12,6 +12,7 @@
 \usepackage{multirow}
 \usepackage{slashbox}
 \usepackage{pdfpages}
+\usepackage{picture}
 
 \title{CS566 Parallel Processing \\ Assignment 03}
 \author{Camillo Lugaresi and Cosmin Stroe \vspace{20pt} \\ Department of Computer Science \\
@@ -205,7 +206,7 @@ the temporary storage used for Strassen. Strassen's algorithm is run locally by
 each processor on a square block with size $n/\sqrt{p}$. Let us assume that
 $n/\sqrt{p}$ is a power of 2.
 
-Each invocation of Strassen on a matrix of size s allocates storage for
+Each invocation of Strassen on a matrix of size $s$ allocates storage for
 $9 \cdot (s/2)^2$ elements (the 7 M matrices and two temporary matrices for computing
 intermediate sums and products). Then it recursively invokes Strassen 7 times on
 blocks of size $s/2$. Therefore its memory usage is:
