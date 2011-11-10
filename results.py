@@ -201,6 +201,8 @@ with open("graphs.txt", "w") as f:
 						if len(timelist) == 0: f.write( SEP + "-" )
 						else: f.write( SEP + "%.3f" % (sum(timelist) / float(len(timelist))) )
 					f.write("\n")
+			f.write("\n")
+			f.write("\n")
 
 # SEP=":"
 # for prog in sorted(progset):
