@@ -188,9 +188,9 @@ for stage in [ 'total', 'LU']:
 proclist = sorted(proccoresets.keys())
 progl = ['cannon', 'cannon -s', 'dns', 'dns -s']
 SEP=":"
-with open("graphs.txt", "w") as f:
-	for n in nset:
-		for k in kset:
+for n in nset:
+	for k in kset:
+		with open("graphs/cannon-dns-%d-%d.txt" % (n,k), "w") as f:
 			f.write( "(%d,%d) " % (n, k) )
 			f.write( ','.join(progl) + "\n\n" )
 			for procs in proclist:
