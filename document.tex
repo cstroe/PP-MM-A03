@@ -378,7 +378,7 @@ C \GETS \CALL{MPI\_Gather\_on\_I-J}{Cred} \vspace{10pt} \\
 
 \vspace{10pt}
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=0.8\textwidth]{images/dns.pdf}
     \caption{An overview of the DNS algorithm.  The A, B and C matrix planes show the scatter/gather operations while the orthogonal arrows show the broadcast/reduce operations.}
@@ -524,7 +524,9 @@ Tables \ref{tab:cannontotal}, \ref{tab:cannon -stotal}, \ref{tab:dnstotal} and \
 
 All of the timings above use the 1D version of LU. We chose it after developing and evaluating two different formulations: the comparison between them is provided in tables \ref{tab:lucompare_total} and \ref{tab:lucompare_LU}.
 
+\clearpage
 \input{results.tex}
+\clearpage
 
 \section{Analysis}
 
@@ -540,10 +542,11 @@ Our version of LU decomposition from assignment 2 required a square grid, and th
 Strassen's algorithm barely edges out the naive algorithm in our tests; we would need larger matrices to see a significant difference.
 
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
-	\includegraphics[width=0.8\textwidth]{images/finished/cannon-dns-1024-2.pdf}
-    \caption{Runtimes of Cannon's and DNS algorithms with naive and strassen's serial matrix multiplication algorithms for $n = 1204 and k = 2$.}
+	\includegraphics[width=1.0\textwidth]{images/finished/cannon-dns-1024-2.pdf}
+    \caption{Runtimes of Cannon's and DNS algorithms with naive and strassen's
+    serial matrix multiplication algorithms for $n = 1204$ and $k = 2$.}
     \label{fig:cannon-dns}
 \end{figure}
 
@@ -571,8 +574,7 @@ Strassen's algorithm barely edges out the naive algorithm in our tests; we would
 
 %\section{Lessons}
 
-\newpage
-~
+\clearpage
 
 \includepdf[pages={-}]{code/pdf/cannon-c.pdf}
 \includepdf[pages=-]{code/pdf/cannon-h.pdf}
