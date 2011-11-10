@@ -47,6 +47,7 @@ computing $A^k$ they contain identical values.  Our determinant is computed by
 running the parallel formulation of the LU decomposition algorithm on the final
 matrix, $A^k$.
 
+Although we considered the possibility of using the square-and-multiply algorithm to compute powers of $X$, we decided against it. The objective of this assignment is to evaluate algorithms for matrix multiplication, and it is more convenient to have the parameter $k$ correspond directly to the number of full matrix multiplications ($k-1$).
 
 
 \subsection{Cannon's Algorithm}
@@ -509,6 +510,8 @@ The DNS algorithm can only be run with a perfect cube number of processes, and
 on ARGO that limits us to 8 processes.
 
 \section{Results}
+
+Tables \ref{tab:cannontotal}, \ref{tab:cannon -stotal}, \ref{tab:dnstotal} and \ref{tab:dns -stotal} show the total runtime for the Cannon, Cannon/Strassen, DNS and DNS/Strassen formulations under a variety of values of $p$ (processing node count), $c$ (core count per node), $n$ (matrix side) and $k$ (power).
 
 \input{results.tex}
 
