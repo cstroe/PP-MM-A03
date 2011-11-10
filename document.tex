@@ -51,8 +51,8 @@ matrix, $A^k$.
 \subsection{Cannon's Algorithm}
 
 The main benefit of Cannon's algorithm for computing the matrix multiplication
-is that it is a \textit{memory space efficient} algorithm, as the storage
-requirements per proccessor remain constant as the number of processors is
+is that it is a \textit{memory space efficient} algorithm, as the total storage
+requirements remain constant as the number of processors is
 increased.  The A and B matrices are each distributed in a different order to
 fulfill a schedule of operations so that the processors only need to compute a multiplication
 between two smaller sub matrices (of size $(n/\sqrt{p})\times(n/\sqrt{p})$ each) at every iteration.  
@@ -61,12 +61,14 @@ along each dimension of the mesh and another multiplication is done. After
 $\sqrt{p}$ iterations of the shift operations, each processor will contain a
 submatrix of C, which are then gathered to the root node and prepared for LU
 decomposition.  Cannon's algorithm is based on a checkerboard data
-decomposition of the output data and uses a 2D mesh toplogy.
+decomposition of the output data and uses a 2D mesh topology.
 
 \subsubsection{Local memory usage}
 
 Each processor holds a block of the operand matrices A and B and of the result
-matrix C. Therefore, $$M_p = O(n^2/p)$$ however, the root node is an exception
+matrix C. Therefore, $$M_p = O(n^2/p)$$
+
+However, the root node is an exception
 since it holds the initial matrix and gathers the final product matrix, so its
 local memory usage is $$M_p = O(n^2)$$
 
@@ -79,12 +81,11 @@ assumption is reflected in the reality of current computer systems.
 For each invocation of the algorithm, each processor performs $\sqrt{p}$ naive
 matrix multiplications of submatrices of size $n/\sqrt{p}$. Naive matrix
 multiplication performs $O(n^3)$ multiplications, so the number of operations
-per processor is $O(\sqrt{p}(n/\sqrt{p})^3)$. Then the total parallel
-computation time is: 
+per processor is $O(\sqrt{p}(n/\sqrt{p})^3)$. Then the computation time is: 
 
 \begin{eqnarray*}
-T_{{comp}} 	&=& O(t_{{mult}} \cdot p \cdot \sqrt{p} \cdot (n/\sqrt{p})^3) \\ 
-			&=& O(t_{{mult}} \cdot n^3)
+T_{{comp}} 	&=& t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^3 \\ 
+			&=& t_{{mult}} \cdot n^3 / p
 \end{eqnarray*}
 
 \subsubsection{Parallel Communication Time}
@@ -123,11 +124,11 @@ Then the overall communication time is:
 \begin{eqnarray*}
 T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
 			&=& 2 \cdot T_{{scatter}} + T_{{skew}} + T_{{shift}}  \\
-			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p}/2 \cdot (t_s + t_w \cdot n^2/p) + \sqrt{p} \cdot (t_s + t_w \cdot n^2/p) \\ 
-			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p} \cdot 3/2 \cdot (t_s + t_w \cdot n^2/p) \\ 
-			&=& t_s(2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w (2 \cdot (n^2/p)(p-1) + n^2/p) \\ 
-			&=& t_s (2 \log{p} + 3/2 \sqrt{p}) + t_w (n^2/p)(2(p-1) + 1) \\
-			&=& t_s (2 \log{p} + 3/2 \sqrt{p}) + t_w (n^2/p)(2p-1) \\
+			&=& 2 \cdot t_s  \cdot \log{p} + 2 \cdot t_w \cdot \frac{n^2}{p}(p-1) + \frac{\sqrt{p}}{2} \cdot (t_s + t_w \cdot n^2/p) + \sqrt{p} \cdot (t_s + t_w \cdot \frac{n^2}{p}) \\ 
+			&=& 2 \cdot t_s \cdot \log{p} + 2 \cdot t_w  \cdot \frac{n^2}{p}(p-1) + \frac{3}{2}\sqrt{p}  \cdot \left(t_s + t_w \cdot \frac{n^2}{p}\right) \\ 
+			&=& t_s \cdot \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) + t_w \cdot \left(2 \frac{n^2}{p}(p-1) + \frac{n^2}{p}\right) \\ 
+			&=& t_s \cdot \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) + t_w \cdot \frac{n^2}{p}(2(p-1) + 1) \\
+			&=& t_s \cdot \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) + t_w \cdot \frac{n^2}{p}(2p-1) \\
 \end{eqnarray*}
 
 
@@ -135,9 +136,9 @@ T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
 
 \begin{eqnarray*}
 T_p 	&=& T_{{comp}} + T_{{comm}} \\
-		&=& t_{{mult}} \cdot n^3 + t_s (2 \log{p} + 3/2 \sqrt{p}) + t_w (n^2/p)(2p-1) \\
-		&=& O(n^3 + \log{p} + \sqrt{p} + n^2 (2p-1)/p) \\
-		&=& O(n^3 + \sqrt{p}) \\
+		&=& t_{{mult}} \cdot \frac{n^3}{p} + t_s \cdot \left(2 \log{p} + \frac{3}{2} \sqrt{p}\right) + t_w \cdot \frac{n^2}{p}(2p-1) \\
+%		&=& O(n^3/p + \log{p} + \sqrt{p} + n^2 (2p-1)/p) \\
+%		&=& O(n^3/p + \sqrt{p}) \\
 \end{eqnarray*}
 
 \subsubsection{Speedup}
@@ -145,10 +146,53 @@ T_p 	&=& T_{{comp}} + T_{{comm}} \\
 For the reference serial algorithm, we will use the naive multiplication algorithm here.
 
 \begin{eqnarray*}
-S &=& T_s / T_p \\
-&=& \frac{n^3}{n^3 / p + \log{p} + \sqrt{p} + n^2 \cdot (2p-1)/p} \\
-&=& \frac{pn^3}{ n^3 + p\log{p} + p\sqrt{p} + n^2 \cdot (2p-1)} \\
-&=& \frac{pn^3}{ p\log{p} + p\sqrt{p} + n^2 \cdot (2p+n-1)}
+S &=& \frac{T_s}{T_p} \\
+&=& \frac{ t_{mult} \cdot n^3 }{ t_{mult} \cdot \frac{n^3}{p} + t_s \cdot \left(2 \log{p} + \frac{3}{2} \sqrt{p}\right) + t_w \cdot \frac{n^2}{p}(2p-1) } \\
+&=& \frac{ n^3 }{ \frac{n^3}{p} + \frac{t_w}{t_{mult}} \cdot \frac{n^2}{p}(2p-1) + \frac{t_s}{t_{mult}} \cdot \left(2 \log{p} + \frac{3}{2} \sqrt{p}\right) } \\
+&=& \frac{ p }{ 1 + \frac{t_w}{t_{mult}} \cdot \frac{2p-1}{n} + \frac{t_s}{t_{mult}} \cdot \frac{p\left(2 \log{p} + \frac{3}{2} \sqrt{p}\right)}{n^3} } \\
+\end{eqnarray*}
+
+%\begin{eqnarray*}
+%S &=& T_s / T_p \\
+%&=& \frac{n^3}{n^3 / p + \log{p} + \sqrt{p} + n^2 \cdot (2p-1)/p} \\
+%&=& \frac{pn^3}{ n^3 + n^2 (2p-1) + p\sqrt{p} + p\log{p} } \\
+%&=& \frac{p}{ 1 + \frac{2p-1}{n} + \frac{p(\sqrt{p} + \log{p})}{n^3} } \\
+%\end{eqnarray*}
+
+If $n$ grows much larger than $p$, the denominator approaches $1$, and so the system approaches linear speedup.
+
+\subsubsection{Efficiency}
+
+\begin{eqnarray*}
+E &=& \frac{T_s}{pT_p} = \frac{S}{ p} = \\
+&=& \frac{ 1 }{ 1 + \frac{t_w}{t_{mult}} \cdot \frac{2p-1}{n} + \frac{t_s}{t_{mult}} \cdot \frac{p\left(2 \log{p} + \frac{3}{2} \sqrt{p}\right)}{n^3} } \\
+\end{eqnarray*}
+
+If $n$ grows much larger than $p$, the system approaches ideal efficiency.
+
+\subsubsection{Cost-optimality}
+
+Cost-optimality is attained when efficiency remains constant as $n$ and $p$ change.
+First, let us note that the impact of the startup time of communication is negligible when the message size is large; since our message size is $n^2/p$, this condition is satisfied. Therefore we can simplify the expression of efficiency as follows:
+
+\begin{eqnarray*}
+E &=& \frac{ 1 }{ 1 + \frac{t_w}{t_{mult}} \cdot \frac{2p-1}{n} } \\
+\end{eqnarray*}
+
+The condition for cost-optimality is then
+
+\begin{eqnarray*}
+O(2p-1) = O(n) \\
+O(p) = O(n) \\
+p = \Theta(n)
+\end{eqnarray*}
+
+Since our workload $W$ is $n^3$, the isoefficiency function can be obtained as
+
+\begin{eqnarray*}
+n &=& \Theta (p) \\
+n^3 &=& \Theta (p^3) \\
+W &=& k \cdot p^3 \\
 \end{eqnarray*}
 
 
@@ -162,7 +206,7 @@ each processor on a square block with size $n/\sqrt{p}$. Let us assume that
 $n/\sqrt{p}$ is a power of 2.
 
 Each invocation of Strassen on a matrix of size s allocates storage for
-$9*(s/2)^2$ elements (the 7 M matrices and two temporary matrices for computing
+$9 \cdot (s/2)^2$ elements (the 7 M matrices and two temporary matrices for computing
 intermediate sums and products). Then it recursively invokes Strassen 7 times on
 blocks of size $s/2$. Therefore its memory usage is:
 
@@ -173,45 +217,44 @@ f(s) &=& 9/4\cdot s^2 + 7\cdot f(s/2)	\\
 &=& 9/4\cdot  ( s^2 + 7/4\cdot  s^2 + (7/4)^2\cdot  s^2 ) +7^3\cdot  f(s/2^3) ... 	\\
 &=& s^2 \cdot   9/4 \cdot   (7/4 + (7/4)^2 + \dots)	\\
 &=& s^2 \cdot   9/4 \cdot   \sum\limits_{i=1}^{log_2 s} (7/4)^i 	\\
-&=& s^2 \cdot   9/4 \cdot   log_2(2^{\sum\limits_{i=1}^{log_2 s} (7/4)^i}) 	\\
-&=& s^2 \cdot   9/4 \cdot   log_2(\prod\limits_{i=1}^{log_2 s} 2^{(7/4)^i}) 	\\
-&=& s^2 \cdot   9/4 \cdot   log_2(\prod\limits_{i=1}^{log_2 s} (7/4)^{2^i}) 	\\
-&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   log_{7/4}(\prod\limits_{i=1}^{log_2 s} (7/4)^{2^i}) 	\\
-&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (\sum\limits_{i=1}^{log_2 s} log_{7/4}(7/4)^{2^i}) 	\\
-&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (\sum\limits_{i=1}^{log_2 s} 2^i) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2\left(2^{\sum\limits_{i=1}^{log_2 s} (7/4)^i}\right) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2\left(\prod\limits_{i=1}^{log_2 s} 2^{(7/4)^i}\right) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2\left(\prod\limits_{i=1}^{log_2 s} (7/4)^{2^i}\right) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   log_{7/4}\left(\prod\limits_{i=1}^{log_2 s} (7/4)^{2^i}\right) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   \left(\sum\limits_{i=1}^{log_2 s} log_{7/4}(7/4)^{2^i}\right) 	\\
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   \left(\sum\limits_{i=1}^{log_2 s} 2^i\right) 	\\
 &=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (2^{log_2 s+1} - 1) 	\\
-&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (2\cdot  s - 1) 	\\
-&=& s^2 \cdot   (2\cdot  s - 1) \cdot   9/4 \cdot   log_2(7/4) 	\\
-&=& (2\cdot  s^3 - s^2) \cdot   9/4 \cdot   log_2(7/4)
+&=& s^2 \cdot   9/4 \cdot   log_2(7/4) \cdot   (2 s - 1) 	\\
+&=& s^2 \cdot   (2  s - 1) \cdot   9/4 \cdot   log_2(7/4) 	\\
+&=& (2  s^3 - s^2) \cdot   9/4 \cdot   log_2(7/4)
 \end{eqnarray*}
 
 Hence
 $$f(s) = O(s^3)$$
 
 	
-$$f(n/\sqrt{p}) = O(n^3/p^{3/2})$$
+$$f(n/\sqrt{p}) = O\left(\frac{n^3}{p^{3/2}}\right)$$
 
 Thus the space complexity becomes:
-$$Mp = O(n^3/p^{3/2} + n^2/p) = O(n^2/p \cdot (n/sqrt(p)+1)) = O(n^3/p^{3/2})$$
+$$Mp = O\left(\frac{n^3}{p^{3/2}} + \frac{n^2}{p}\right) = O\left(\frac{n^2}{p} \cdot \left(\frac{n}{\sqrt{p}}+1\right)\right) = O\left(\frac{n^3}{p^{3/2}}\right)$$
 
 For the root node, it becomes:
 
-$$Mp = O(n^3/p^{3/2} + n^2) = O(n^2 \cdot (n/p^(3/2) + 1)) = O(n^3/p^{3/2})$$
+$$Mp = O\left(\frac{n^3}{p^{3/2}} + n^2\right) = O\left(n^2 \cdot \left(\frac{n}{p^{3/2}} + 1\right)\right) = O\left(\frac{n^3}{p^{3/2}}\right)$$
 
 
 \subsubsection{Parallel computation time}
 
 For each invocation of the algorithm, each processor performs $\sqrt{p}$ Strassen
 matrix multiplications of submatrices of size $n/\sqrt{p}$. Strassen matrix
-multiplication performs $\approx O(n^{2.807})$ multiplications, so the number of
-operations per processor is $O(\sqrt{p}*(n/\sqrt{p})^{2.807})$. Then the computation time is:
+multiplication performs $\approx n^{2.807}$ multiplications, so the number of
+operations per processor is $\sqrt{p} \cdot (n/\sqrt{p})^{2.807}$. Then the computation time is:
 
 \begin{eqnarray*}
-T_{{comp}} &=& O(t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807}) \\
-&=& O(t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807}) \\
-&=& O(t_{{mult}} \cdot n^{2.807} \cdot \sqrt{p} \cdot  p^{-2.807/2}) \\
-&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{(1-2.807)/2}) \\
-&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035})
+T_{{comp}} &=& t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807} \\
+&=& t_{{mult}} \cdot n^{2.807} \cdot \sqrt{p} \cdot  p^{-2.807/2} \\
+&=& t_{{mult}} \cdot n^{2.807} \cdot  p^{(1-2.807)/2} \\
+&=& t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035}
 \end{eqnarray*}
 
 \subsubsection{Parallel communication time}
@@ -220,29 +263,69 @@ This is unchanged from the regular Cannon's algorithm:
 
 \begin{eqnarray*}
 T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
-			&=& 2 T_{{scatter}} + T_{{skew}} + T_{{shift}} \\
-			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p}/2 \cdot (t_s + t_w \cdot n^2/p) + \sqrt{p}(t_s + t_w \cdot n^2/p) \\
-			&=& t_s \cdot 2 \cdot \log{p} + t_w \cdot 2 \cdot (n^2/p)(p-1) + \sqrt{p} \cdot 3/2 \cdot (t_s + t_w \cdot n^2/p) \\
-			&=& t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (2 \cdot (n^2/p)(p-1) + n^2/p) \\
-			&=& t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p)(2*(p-1) + 1) \\
-			&=& t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p)(2p-1) \\
+			&=& t_s \cdot \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) + t_w \cdot \frac{n^2}{p}(2p-1) \\
 \end{eqnarray*}
 
 \subsubsection{Parallel run-time}
 
 \begin{eqnarray*}
 T_p &=& T_{{comp}} + T_{{comm}} \\
-&=& t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035} +  t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p) \cdot (2p-1) \\
-&=& O(n^{2.807} \cdot  p^{-0.9035} + log(p) + sqrt(p) + n^2*(2p-1)/p) \\
-&=& O(n^{2.807} \cdot  p^{-0.9035} + sqrt(p))
+&=& t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035} + t_s \cdot \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) + t_w \cdot \frac{n^2}{p}(2p-1)
 \end{eqnarray*}
 
-Since n is always greater than p, we can reduce this to:
 
-$$	T_p = O(n^{2.807} \cdot  p^{-0.9035})$$
+\subsubsection{Speedup}
 
+In this case, we will use Strassen as the reference serial algorithm.
 
+\begin{eqnarray*}
+S &=& \frac{T_s}{T_p} \\
+&=& \frac{ t_{{mult}} \cdot n^{2.807} }{  t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035} + t_s \cdot \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) + t_w \cdot \frac{n^2}{p}(2p-1) } \\
+&=& \frac{ n^{2.807} }{  n^{2.807} \cdot  p^{-0.9035} + \frac{t_s}{t_{mult}} \cdot \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) + \frac{t_w}{t_{mult}} \cdot \frac{n^2}{p}(2p-1) } \\
+&=& \frac{ 1 }{  p^{-0.9035} + \frac{t_w}{t_{mult}} \cdot \frac{n^2}{p  n^{2.807}}(2p-1) + \frac{t_s}{t_{mult}} \cdot \frac{ \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) }{ n^{2.807} }  } \\
+&=& \frac{ p^{0.9035} }{  1 + \frac{t_w}{t_{mult}} \cdot \frac{p^{0.9035} n^2}{p  n^{2.807}}(2p-1) + \frac{t_s}{t_{mult}} \cdot \frac{ p^{0.9035} \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) }{ n^{2.807} }  } \\
+&=& \frac{ p^{0.9035} }{  1 + \frac{t_w}{t_{mult}} \cdot \frac{ 2p-1}{p^{0.0965}  n^{0.807}} + \frac{t_s}{t_{mult}} \cdot \frac{ p^{0.9035} \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) }{ n^{2.807} }  } \\
+\end{eqnarray*}
 
+It may be interesting to compare this with the expression we obtained for the speedup with the standard Cannon's algorithm:
+
+\begin{eqnarray*}
+S_{cannon}&=& \frac{ p }{ 1 + \frac{t_w}{t_{mult}} \cdot \frac{2p-1}{n} + \frac{t_s}{t_{mult}} \cdot \frac{p\left(2 \log{p} + \frac{3}{2} \sqrt{p}\right)}{n^3} } \\
+\end{eqnarray*}
+
+\subsubsection{Efficiency}
+
+\begin{eqnarray*}
+E &=& \frac{T_s}{pT_p} = \frac{S}{ p} = \\
+&=& \frac{ p^{-0.0965} }{  1 + \frac{t_w}{t_{mult}} \cdot \frac{ 2p-1}{p^{0.0965}  n^{0.807}} + \frac{t_s}{t_{mult}} \cdot \frac{ p^{0.9035} \left(2 \log{p} + \frac{3}{2}\sqrt{p}\right) }{ n^{2.807} }  } \\
+\end{eqnarray*}
+
+Again, noting that our message size is large, we can simplify the expression as
+
+\begin{eqnarray*}
+E &=& \frac{ p^{-0.0965} }{  1 + \frac{t_w}{t_{mult}} \cdot \frac{ 2p-1}{p^{0.0965}  n^{0.807}}   } \\
+&=& \frac{ 1 }{  p^{0.0965} + \frac{t_w}{t_{mult}} \cdot \frac{ 2p-1}{ n^{0.807}}   } \\
+\end{eqnarray*}
+
+\subsubsection{Cost-optimality}
+
+The condition for cost-optimality is
+
+\begin{eqnarray*}
+  p^{0.0965} + \frac{t_w}{t_{mult}} \cdot \frac{ 2p-1}{ n^{0.807}}    &=& O(1) \\
+  p^{0.0965} + \frac{ p}{ n^{0.807}}    &=& O(1) \\
+  \frac{ p}{ n^{0.807}}    &=& \Theta(p^{0.0965}) \\
+  \frac{ p}{ p^{0.0965}}    &=& \Theta(n^{0.807}) \\
+  p^{0.9035}    &=& \Theta(n^{0.807}) \\
+\end{eqnarray*}
+
+Since our workload $W$ is $n^3$, the isoefficiency function can be obtained as
+
+\begin{eqnarray*}
+n^{0.807} &=& \Theta (p^{0.9035}) \\
+n^3 &=& \Theta (p^{3 \cdot 0.9035 /  0.807}) \\
+W &=& k \cdot p^{3.3587} \\
+\end{eqnarray*}
 
 \subsection{Dekel, Nassimi, Sahni (DNS) Algorithm}
 
@@ -390,6 +473,8 @@ on ARGO that limits us to 8 processes.
 \input{results.tex}
 
 \section{Analysis}
+
+We applied Cannon's parallelization to two different matrix multiplication algorithms: the naive one, which is $O(n^3)$, and Strassen's, which is $O(n^{2.807})$. The communication overhead is exactly the same, but Strassen's computation time is $t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035}$, compared to $t_{mult} \cdot n^3 / p$: therefore, the version using Strassen's has a better runtime. However, its isoefficiency function is worse: $k \cdot p^{3.3587}$ compared to $k \cdot p^3$.
 
 It is difficult to compare Cannon and DNS directly, since the former algorithm requires a number of processors
  that is a square number, while the latter requires a cube. The smallest number of processors that would satisfy both is $2^6 = 64$, but we do not have
