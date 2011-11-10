@@ -92,28 +92,33 @@ T_{{comp}} 	&=& O(t_{{mult}} \cdot p \cdot \sqrt{p} \cdot (n/\sqrt{p})^3) \\
 The algorithm involves the following communication steps:
 \begin{itemize}
 	\item scatter the X matrix into blocks of size $O(n^2/p)$
-	\item skew matrix $A$ ($B$); each processor performs a ring\_shift operation on
-	the row (column) ring with distance = row (column) number - $\sqrt(p)$ times:
-	\item shift matrix $A$ ($B$): ring\_shift with distance 1
+	\item skew matrix A (B); each processor performs a ring\_shift operation on
+	the row (column) ring with distance = row (column) number
+	\item $\sqrt{p}$ times: shift matrix A (B): ring\_shift with distance 1
 	\item gather the product matrix
 \end{itemize}
 
-The message size m is always $n^2/p$. In general, we can assume that ts is
-dominated by $tw \cdot m$. Scatter on a mesh takes: $$T_{{scatter}} = t_s
+The message size $m$ is always $n^2/p$. In general, we can assume that $t_s$ is
+dominated by $t_w \cdot m$.
+
+\begin{itemize}
+	\item Scatter on a mesh takes: $$T_{{scatter}} = t_s
 \log{p} + t_w \cdot m  \cdot (p-1) = t_s \log{p} + t_w \cdot (n^2/p) \cdot
-(p-1)$$. Gather has the same complexity as scatter.
+(p-1)$$
+Gather has the same complexity as scatter.
 
-Ring q-shift involves min(q, p-q) neighbor-to-neighbor communications:
-$$T_{{shift-q}} = \min{q,p-q} \cdot (t_s + t_w \cdot m)$$
+\item Ring q-shift involves $\min(q, p-q)$ neighbor-to-neighbor communications:
+$$T_{{shift-q}} = \min(q,p-q) \cdot (t_s + t_w \cdot m)$$
 
-The highest value for the skew shift will be:
+\item The highest value for the skew shift will be:
 $$T_{{skew}} = \sqrt{p}/2 \cdot (t_s + t_w \cdot n^2/p)$$
 
-For all of the sqrt(p) shifts collectively, we have
+\item For all of the $\sqrt{p}$ shifts collectively, we have
 $$T_{{shift}} = \sqrt{p} \cdot (t_s + t_w \cdot n^2/p)$$
 
-Then the overall communication time is:
+\end{itemize}
 
+Then the overall communication time is:
 
 \begin{eqnarray*}
 T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
@@ -126,7 +131,6 @@ T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
 \end{eqnarray*}
 
 
-
 \subsubsection{Parallel Run Time}
 
 \begin{eqnarray*}
@@ -136,10 +140,17 @@ T_p 	&=& T_{{comp}} + T_{{comm}} \\
 		&=& O(n^3 + \sqrt{p}) \\
 \end{eqnarray*}
 
+\subsubsection{Speedup}
 
-Since n is always greater than p, we can reduce this to:
+For the reference serial algorithm, we will use the naive multiplication algorithm here.
 
-$$T_p = O(n^3)$$
+\begin{eqnarray*}
+S &=& T_s / T_p \\
+&=& \frac{n^3}{n^3 / p + \log{p} + \sqrt{p} + n^2 \cdot (2p-1)/p} \\
+&=& \frac{pn^3}{ n^3 + p\log{p} + p\sqrt{p} + n^2 \cdot (2p-1)} \\
+&=& \frac{pn^3}{ p\log{p} + p\sqrt{p} + n^2 \cdot (2p+n-1)}
+\end{eqnarray*}
+
 
 \subsection{Cannon's algorithm with local multiplication using Strassen}
 
@@ -190,16 +201,18 @@ $$Mp = O(n^3/p^{3/2} + n^2) = O(n^2 \cdot (n/p^(3/2) + 1)) = O(n^3/p^{3/2})$$
 
 \subsubsection{Parallel computation time}
 
-For each invocation of the algorithm, each processor performs sqrt(p) Strassen
-matrix multiplications of submatrices of size n/sqrt(p). Strassen matrix
+For each invocation of the algorithm, each processor performs $\sqrt{p}$ Strassen
+matrix multiplications of submatrices of size $n/\sqrt{p}$. Strassen matrix
 multiplication performs $\approx O(n^{2.807})$ multiplications, so the number of
-operations per processor is $O(\sqrt{p}*(n/\sqrt{p})^{2.807})$. Then the total
-parallel computation time is:
-$$T_{{comp}} = O(t_{{mult}}*p*\sqrt{p}*(n/\sqrt{p})^{2.807})$$
-$$O(t_{{mult}}*p^{3/2}*(n/\sqrt{p})^{2.807})$$
-$$= O(t_{{mult}}*n^{2.807} * p^{3/2} * p^{-2.807/2}) $$
-$$= O(t_{{mult}} * n^{2.807} * p^{(3-2.807)/2}) $$
-$$= O(t_{{mult}} * n^{2.807} * p^{0.096})$$
+operations per processor is $O(\sqrt{p}*(n/\sqrt{p})^{2.807})$. Then the computation time is:
+
+\begin{eqnarray*}
+T_{{comp}} &=& O(t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807}) \\
+&=& O(t_{{mult}} \cdot \sqrt{p} \cdot (n/\sqrt{p})^{2.807}) \\
+&=& O(t_{{mult}} \cdot n^{2.807} \cdot \sqrt{p} \cdot  p^{-2.807/2}) \\
+&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{(1-2.807)/2}) \\
+&=& O(t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035})
+\end{eqnarray*}
 
 \subsubsection{Parallel communication time}
 
@@ -217,13 +230,16 @@ T_{{comm}} 	&=& T_{{scatter}} + T_{{skew}} + T_{{shift}} + T_{{gather}} \\
 
 \subsubsection{Parallel run-time}
 
-$$T_p = T_{{comp}} + T_{{comm}} = t_{{mult}} * n^2.807 * p^0.096 + t_s*(2*\log{p} + 3/2*\sqrt{p}) + t_w*(n^2/p)*(2p-1) =$$
-$$	= O(n^2.807 * p^0.096 + log(p) + sqrt(p) + n^2*(2p-1)/p) =$$
-$$	= O(n^2.807 * p^0.096 + sqrt(p))$$
+\begin{eqnarray*}
+T_p &=& T_{{comp}} + T_{{comm}} \\
+&=& t_{{mult}} \cdot n^{2.807} \cdot  p^{-0.9035} +  t_s \cdot (2 \cdot \log{p} + 3/2 \cdot \sqrt{p}) + t_w \cdot (n^2/p) \cdot (2p-1) \\
+&=& O(n^{2.807} \cdot  p^{-0.9035} + log(p) + sqrt(p) + n^2*(2p-1)/p) \\
+&=& O(n^{2.807} \cdot  p^{-0.9035} + sqrt(p))
+\end{eqnarray*}
 
 Since n is always greater than p, we can reduce this to:
 
-$$	T_p = O(n^{2.807} * p^{0.096})$$
+$$	T_p = O(n^{2.807} \cdot  p^{-0.9035})$$
 
 
 
