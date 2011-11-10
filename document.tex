@@ -51,20 +51,17 @@ matrix, $A^k$.
 
 \subsection{Cannon's Algorithm}
 
-Cannon's algorithm 
+Cannon's algorithm is based on a checkerboard decomposition of the output data: the processors are arranged in a 2D mesh, and each is tasked with computing an $(n/\sqrt{p} \times n/\sqrt{p})$ block of the output matrix C.
+To do so, each processor needs to access the corresponding row of blocks of matrix A and the corresponding column of blocks of matrix B:
 
-The main benefit of Cannon's algorithm for computing the matrix multiplication
-is that it is a \textit{memory space efficient} algorithm, as the total storage
-requirements remain constant as the number of processors is
-increased.  The A and B matrices are each distributed in a different order to
-fulfill a schedule of operations so that the processors only need to compute a multiplication
-between two smaller sub matrices (of size $(n/\sqrt{p})\times(n/\sqrt{p})$ each) at every iteration.  
-Because of the way they are distributed, these sub matrices are then shifted
-along each dimension of the mesh and another multiplication is done. After
-$\sqrt{p}$ iterations of the shift operations, each processor will contain a
-submatrix of C, which are then gathered to the root node and prepared for LU
-decomposition.  Cannon's algorithm is based on a checkerboard data
-decomposition of the output data and uses a 2D mesh topology.
+$$C_{i,j} = \sum\limits_{k=1}^{\sqrt{p}} A_{i,k} \cdot B_{k,j}$$
+
+A naive solution would be to have each processor store the entire row and column it needs, but that would be memory-inefficient. Instead, Cannon's algorithm distributes an $(n/\sqrt{p} \times n/\sqrt{p})$ block of A and one of B to the processor owning the block of C with the same coordinates, and relies on an intelligent schedule of communications and computations to ensure each processor gets the data it needs with no waste of memory and no dead times.
+
+First, note that, by successively performing ring-1-shifts of the blocks of the A matrix on the row rings, and ring-1-shifts of the blocks of the  B matrix on the column rings, each processor gets to access all the blocks it needs. The problem is to ensure that the blocks are lined up so that the processor simultaneously holds the blocks of A and B that must be multiplied together.
+
+As it turns out, this condition can be ensured for all processors at the same time by performing an initial skewing of the A and B matrices. Each row of A is shifted left by $i-1$ steps (where $i$ is the row number), and each column of B is shifted up by $j-1$ steps (where $j$ is the column number). At this point, each processor holds two blocks of A and B that must be multiplied together to form one term of the sum that produces $C_{i,j}$. Then all rows of A are shifted left by one step, and all columns of B are shifted up by one step; again, each processor ends up with a pair of elements that must be multiplied together and added to the computation of its $C_{i,j}$. These shift and multiply operations are repeated $\sqrt{p}$ times, until each processor has finished computing its block of C. Then the product matrix can be gathered.
+
 
 \subsubsection{Local memory usage}
 
