@@ -4,15 +4,13 @@ This repository started out as a class project for the [Parallel Processing cour
 
 Several matrix multiplication algorithms are implemented in C, timings are recorded and a report was written.
 
-## Pre-requisites
+## Generating the report
 
 On Ubuntu, the `texlive-full` package is required:
 
     sudo apt install texlive-full
 
-## Usage
-
-Generating the PDF report:
+Then, to generate the PDF report type:
 
     make
 
