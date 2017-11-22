@@ -4,5 +4,19 @@ This repository started out as a class project for the [Parallel Processing cour
 
 Several matrix multiplication algorithms are implemented in C, timings are recorded and a report was written.
 
+## Pre-requisites
+
+On Ubuntu, the `texlive-full` package is required:
+
+    sudo apt install texlive-full
+
+## Usage
+
+Generating the PDF report:
+
+    make
+
+This will produce a `document.pdf`.
+
 ## Related Links
 * [go-mpi](https://github.com/JohannWeging/go-mpi) - [golang](https://golang.org/) bindings for [MPI](http://mpi-forum.org/)
