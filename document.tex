@@ -63,7 +63,7 @@ A naive solution would be to have each processor store the entire row and column
 
 First, note that, by successively performing ring-1-shifts of the blocks of the A matrix on the row rings, and ring-1-shifts of the blocks of the  B matrix on the column rings, each processor gets to access all the blocks it needs. The problem is to ensure that the blocks are lined up so that the processor simultaneously holds the blocks of A and B that must be multiplied together.
 
-As it turns out, this condition can be ensured for all processors at the same time by performing an initial skewing of the A and B matrices (figure \ref{fig:cannon-skew}). Each row of A is shifted left by $i-1$ steps (where $i$ is the row number), and each column of B is shifted up by $j-1$ steps (where $j$ is the column number). At this point, each processor holds two blocks of A and B that must be multiplied together to form one term of the sum that produces $C_{i,j}$.
+As it turns out, this condition can be ensured for all processors at the same time by performing an initial skewing of the A and B matrices (Figure \ref{fig:cannon-skew}). Each row of A is shifted left by $i-1$ steps (where $i$ is the row number), and each column of B is shifted up by $j-1$ steps (where $j$ is the column number). At this point, each processor holds two blocks of A and B that must be multiplied together to form one term of the sum that produces $C_{i,j}$.
 
 Then all rows of A are shifted left by one step, and all columns of B are shifted up by one step; again, each processor ends up with a pair of elements that must be multiplied together and added to the computation of its $C_{i,j}$. These shift and multiply operations are repeated $\sqrt{p}$ times, until each processor has finished computing its block of C. Then the product matrix can be gathered.
 
@@ -71,8 +71,8 @@ Then all rows of A are shifted left by one step, and all columns of B are shifte
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\textwidth]{images/cannon-skew.pdf}
-    \label{fig:cannon-skew}
     \caption{Explanation of the skew operation in Cannon's algorithm.}
+    \label{fig:cannon-skew}
 \end{figure}
 
 \subsubsection{Local memory usage}
