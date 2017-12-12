@@ -14,7 +14,7 @@ Then, to generate the PDF report type:
 
     make
 
-This will produce a `document.pdf`.
+This will produce [document.pdf](document.pdf).
 
 ## Related Links
 * [go-mpi](https://github.com/JohannWeging/go-mpi) - [golang](https://golang.org/) bindings for [MPI](http://mpi-forum.org/)
